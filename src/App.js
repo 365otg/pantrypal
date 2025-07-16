@@ -697,7 +697,163 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
 
 // --- Main App Component ---
 // This is the main export that will be rendered.
-export default function App() {
-    return <AppWrapper />;
-}
+const App = () => {
+    const [view, setView] = useState('home');
+    const [isPro, setIsPro] = useState(false);
+    const [favorites, setFavorites] = useState([]);
+    const [recentSearches, setRecentSearches] = useState([]);
+    const [showPaywall, setShowPaywall] = useState(false);
+    const [pendingAction, setPendingAction] = useState(null);
+
+    // State lifted from HomePage
+    const [ingredients, setIngredients] = useState('');
+    const [recipes, setRecipes] = useState([]);
+    const [mealPlan, setMealPlan] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+
+    // Load Pro status and saved data from localStorage on initial render
+    useEffect(() => {
+        try {
+            const savedProStatus = localStorage.getItem('pantrypal_isPro');
+            if (savedProStatus === 'true') {
+                setIsPro(true);
+            }
+
+            const savedFavorites = localStorage.getItem('pantrypal_favorites');
+            if (savedFavorites) {
+                setFavorites(JSON.parse(savedFavorites));
+            }
+            
+            const savedSearches = localStorage.getItem('pantrypal_recentSearches');
+            if (savedSearches) {
+                setRecentSearches(JSON.parse(savedSearches));
+            }
+        } catch (e) {
+            console.error("Error loading data from localStorage", e);
+        }
+    }, []);
+
+    const handlePaymentSuccess = () => {
+        setIsPro(true);
+        localStorage.setItem('pantrypal_isPro', 'true');
+        setShowPaywall(false);
+        if (pendingAction) {
+            // Automatically run the action the user was trying to do
+            pendingAction(true); // Pass new pro status
+            setPendingAction(null);
+        }
+    };
+
+    const toggleFavorite = (recipe) => {
+        if (!isPro) {
+            setShowPaywall(true);
+            setPendingAction(() => () => toggleFavorite(recipe)); // Save the specific action
+            return;
+        }
+        let updatedFavorites;
+        const isFavorited = favorites.some(fav => fav.recipeName === recipe.recipeName);
+
+        if (isFavorited) {
+            updatedFavorites = favorites.filter(fav => fav.recipeName !== recipe.recipeName);
+        } else {
+            updatedFavorites = [...favorites, recipe];
+        }
+        setFavorites(updatedFavorites);
+        localStorage.setItem('pantrypal_favorites', JSON.stringify(updatedFavorites));
+    };
+    
+    const addRecentSearch = (searchIngredients) => {
+        const updatedSearches = [searchIngredients, ...recentSearches.filter(s => s !== searchIngredients)].slice(0, 5);
+        setRecentSearches(updatedSearches);
+        localStorage.setItem('pantrypal_recentSearches', JSON.stringify(updatedSearches));
+    };
+    
+    const renderView = () => {
+        if (showPaywall) {
+            return <PaymentScreen onPaymentSuccess={handlePaymentSuccess} />;
+        }
+        switch(view) {
+            case 'profile':
+                return <ProfilePage favorites={favorites} toggleFavorite={toggleFavorite} recentSearches={recentSearches} setView={setView} isPro={isPro} />;
+            case 'mealPlan':
+                return <MealPlanPage setView={setView} ingredients={ingredients} mealPlan={mealPlan} setMealPlan={setMealPlan} />;
+            case 'home':
+            default:
+                return <HomePage 
+                            isPro={isPro}
+                            setShowPaywall={setShowPaywall}
+                            setPendingAction={setPendingAction}
+                            toggleFavorite={toggleFavorite}
+                            favorites={favorites}
+                            addRecentSearch={addRecentSearch}
+                            setView={setView}
+                            ingredients={ingredients}
+                            setIngredients={setIngredients}
+                            recipes={recipes}
+                            setRecipes={setRecipes}
+                            isLoading={isLoading}
+                            setIsLoading={setIsLoading}
+                            error={error}
+                            setError={setError}
+                        />;
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-green-50/50 font-lato text-stone-800 farmhouse-background">
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Lato:wght@400;700&display=swap');
+                body { font-family: 'Lato', sans-serif; }
+                .font-lora { font-family: 'Lora', serif; }
+                .farmhouse-background {
+                    background-color: #f0fdf4;
+                }
+                 .animate-fade-in-up { 
+                    animation: fadeInUp 0.6s ease-out forwards; 
+                    opacity: 0;
+                 }
+                @keyframes fadeInUp { 
+                    from { opacity: 0; transform: translateY(20px); } 
+                    to { opacity: 1; transform: translateY(0); } 
+                }
+                .button-transition {
+                    transition: transform 0.1s ease-out, background-color 0.2s ease;
+                }
+                .button-transition:hover {
+                    transform: translateY(-2px);
+                }
+                .button-transition:active {
+                    transform: translateY(0px);
+                }
+                .no-select {
+                    -webkit-user-select: none; /* Safari */
+                    -ms-user-select: none; /* IE 10 and IE 11 */
+                    user-select: none; /* Standard syntax */
+                }
+                @media print {
+                    .no-print {
+                        display: none !important;
+                    }
+                    body * {
+                        visibility: hidden;
+                    }
+                    #printable-meal-plan, #printable-meal-plan * {
+                        visibility: visible;
+                    }
+                    #printable-meal-plan {
+                        position: absolute;
+                        left: 0;
+                        top: 0;
+                        width: 100%;
+                    }
+                }
+            `}</style>
+            <Navbar setView={setView} isPro={isPro} />
+            {renderView()}
+        </div>
+    );
+};
+
+export default App;
 
