@@ -697,7 +697,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
 
 // --- Main App Component ---
 // This is the main export that will be rendered.
-const App = () => {
+export default function App() {
     const [view, setView] = useState('home');
     const [isPro, setIsPro] = useState(false);
     const [favorites, setFavorites] = useState([]);
@@ -854,6 +854,3 @@ const App = () => {
         </div>
     );
 };
-
-export default App;
-
