@@ -1,5 +1,6 @@
 {
   "name": "pantrypal",
+  "homepage": "https://365otg.github.io/pantrypal",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
