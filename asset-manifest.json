@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/pantrypal/static/css/main.e6c13ad2.css",
+    "main.js": "/pantrypal/static/js/main.fb04d7dd.js",
+    "static/js/453.fd25e0db.chunk.js": "/pantrypal/static/js/453.fd25e0db.chunk.js",
+    "index.html": "/pantrypal/index.html",
+    "main.e6c13ad2.css.map": "/pantrypal/static/css/main.e6c13ad2.css.map",
+    "main.fb04d7dd.js.map": "/pantrypal/static/js/main.fb04d7dd.js.map",
+    "453.fd25e0db.chunk.js.map": "/pantrypal/static/js/453.fd25e0db.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.e6c13ad2.css",
+    "static/js/main.fb04d7dd.js"
+  ]
+}
